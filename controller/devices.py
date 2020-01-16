@@ -45,6 +45,7 @@ class Devices():
         devs = usb.core.find(find_all=True, idVendor=0x16c0)
         for dev in devs:
             try:
+                #print(repr(dev))
                 dev.write(0x03, 'i\n')
                 id_arr = dev.read(0x84, size_or_buffer=64, timeout=100)
                 id_str = ''.join(chr(x) for x in id_arr).strip()

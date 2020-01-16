@@ -425,9 +425,9 @@ class Controller:
         # enable periodic probing
         pygame.time.set_timer(PROBE_EVENT, 1000)
         # enable/disable buttons
-        self.activate(self.btn_start)
-        self.activate(self.btn_start24)
         if not self.btn_pause.toggled:
+            self.activate(self.btn_start)
+            self.activate(self.btn_start24)
             self.deactivate(self.btn_stop)
             self.deactivate(self.btn_pause)
 
@@ -485,6 +485,9 @@ class Controller:
         self.action_mode()
 
     def stop_click(self):
+        if self.btn_pause.toggled:
+            self.btn_pause._force_unpress()
+            self.btn_pause.unblit_and_reblit()
         self.config_mode()
         self.reset_action()
 
