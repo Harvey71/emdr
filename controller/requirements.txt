@@ -1,0 +1,3 @@
+pyUSB
+pygame
+thorpy
