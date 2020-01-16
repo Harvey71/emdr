@@ -5,6 +5,8 @@ from config import Config
 from time import sleep
 import os
 from threading import Timer
+from thorpy._utils.images import load_image
+from thorpy.painting.painters.imageframe import ButtonImage
 
 PROBE_EVENT = pygame.USEREVENT + 1
 ACTION_EVENT = pygame.USEREVENT + 2
@@ -150,27 +152,59 @@ class Switch():
 class Controller:
 
     def button(self, x, y, title, callback=None, togglable=False):
-        painter = thorpy.painters.classicframe.ClassicFrame(size=(110, 70))
+        try:
+            painter = thorpy.painters.imageframe.ButtonImage(
+                img_normal=os.path.join('imgs', '%s_normal.png' % title.lower()),
+                img_pressed=os.path.join('imgs', '%s_pressed.png' % title.lower())
+            )
+        except:
+            painter = thorpy.painters.imageframe.ButtonImage(
+                img_normal=os.path.join('imgs', '%s_normal.png' % 'default'),
+                img_pressed=os.path.join('imgs', '%s_pressed.png' % 'default')
+            )
+        try:
+            inactive_painter = thorpy.painters.imageframe.ButtonImage(
+                img_normal=os.path.join('imgs', '%s_inactive.png' % title.lower())
+            )
+        except:
+            inactive_painter = thorpy.painters.imageframe.ButtonImage(
+                img_normal=os.path.join('imgs', '%s_inactive.png' % 'default')
+            )
         if togglable:
-            btn = thorpy.Togglable(title)
+            btn = thorpy.Togglable('')
         else:
-            btn = thorpy.Clickable(title)
+            btn = thorpy.Clickable('')
+        btn.normal_painter = painter
+        btn.inactive_painter = inactive_painter
         btn.set_painter(painter)
         btn.user_func = callback
         btn.finish()
         btn.set_center_pos((60 + 120 * x, 40 + 80 * y))
         return btn
+        thorpy.make_image_button()
+
+    def activate(self, elem):
+        if not elem.active:
+            elem.set_active(True)
+            elem.change_painter(elem.normal_painter, autopress=False)
+            elem.unblit_and_reblit()
+
+    def deactivate(self, elem):
+        if elem.active:
+            elem.set_active(False)
+            elem.change_painter(elem.inactive_painter, autopress=False)
+            elem.unblit_and_reblit()
 
     def __init__(self):
         self.in_load = False
         self.app = MyThorpyApp(size=(480, 320), caption="EMDR Controller", icon='pygame')
-        self.btn_start = self.button(0, 0, 'Start', self.start_click)
-        self.btn_start24 = self.button(1, 0, 'Start24', self.start24_click)
+        self.btn_start = self.button(0, 0, 'Play', self.start_click)
+        self.btn_start24 = self.button(1, 0, 'Play24', self.start24_click)
         self.btn_stop = self.button(2, 0, 'Stop', self.stop_click)
         self.btn_pause = self.button(3, 0, 'Pause', self.pause_click, togglable=True)
-        self.btn_lightbar = self.button(0, 1, 'Licht', self.lightbar_click, togglable=True)
-        self.btn_buzzer = self.button(0, 2, 'Haptik', self.buzzer_click, togglable=True)
-        self.btn_headphone = self.button(0, 3, 'Ton', self.headphone_click, togglable=True)
+        self.btn_lightbar = self.button(0, 1, 'Light', self.lightbar_click, togglable=True)
+        self.btn_buzzer = self.button(0, 2, 'Buzzer', self.buzzer_click, togglable=True)
+        self.btn_headphone = self.button(0, 3, 'Sound', self.headphone_click, togglable=True)
         # speed area
         self.sel_counter = Selector(2, 1, 'Zähler', None, '{0:d}', None, None)
         self.sel_counter.set_value(0)
@@ -184,8 +218,8 @@ class Controller:
             self.btn_speed_minus,
         ])
         # lightbar area
-        self.btn_light_on = self.button(1, 1, 'Ein', togglable=True)
-        self.btn_light_off = self.button(2, 1, 'Aus', togglable=True)
+        self.btn_light_on = self.button(1, 1, 'On', togglable=True)
+        self.btn_light_off = self.button(2, 1, 'Off', togglable=True)
         self.switch_light = Switch(self.btn_light_on, self.btn_light_off, self.update_light)
         self.btn_light_test = self.button(3, 1, 'Test', self.light_test_click, togglable=True)
         self.btn_light_color_plus = self.button(1, 2, '+')
@@ -206,8 +240,8 @@ class Controller:
             self.btn_light_intens_minus,
         ])
         # buzzer area
-        self.btn_buzzer_on = self.button(1, 1, 'Ein', togglable=True)
-        self.btn_buzzer_off = self.button(2, 1, 'Aus', togglable=True)
+        self.btn_buzzer_on = self.button(1, 1, 'On', togglable=True)
+        self.btn_buzzer_off = self.button(2, 1, 'Off', togglable=True)
         self.switch_buzzer = Switch(self.btn_buzzer_on, self.btn_buzzer_off, self.update_buzzer)
         self.btn_buzzer_test = self.button(3, 1, 'Test', self.buzzer_test_click)
         self.btn_buzzer_duration_plus = self.button(1, 2, '+')
@@ -222,8 +256,8 @@ class Controller:
             self.btn_buzzer_duration_minus,
         ])
         # headphone area
-        self.btn_headphone_on = self.button(1, 1, 'Ein', togglable=True)
-        self.btn_headphone_off = self.button(2, 1, 'Aus', togglable=True)
+        self.btn_headphone_on = self.button(1, 1, 'On', togglable=True)
+        self.btn_headphone_off = self.button(2, 1, 'Off', togglable=True)
         self.switch_headphone = Switch(self.btn_headphone_on, self.btn_headphone_off, self.update_sound)
         self.btn_headphone_test = self.button(3, 1, 'Test', self.headphone_test_click)
         self.btn_headphone_volume_plus = self.button(1, 2, '+')
@@ -391,11 +425,11 @@ class Controller:
         # enable periodic probing
         pygame.time.set_timer(PROBE_EVENT, 1000)
         # enable/disable buttons
-        self.btn_start.set_active(True)
-        self.btn_start24.set_active(True)
+        self.activate(self.btn_start)
+        self.activate(self.btn_start24)
         if not self.btn_pause.toggled:
-            self.btn_stop.set_active(False)
-            self.btn_pause.set_active(False)
+            self.deactivate(self.btn_stop)
+            self.deactivate(self.btn_pause)
 
     def post_action(self):
         if self.mode == 'action':
@@ -425,10 +459,10 @@ class Controller:
         self.adjust_action_timer()
         Timer(self.action_delay, self.post_action).start()
         # enable/disable buttons
-        self.btn_start.set_active(False)
-        self.btn_start24.set_active(False)
-        self.btn_stop.set_active(True)
-        self.btn_pause.set_active(True)
+        self.deactivate(self.btn_start)
+        self.deactivate(self.btn_start24)
+        self.activate(self.btn_stop)
+        self.activate(self.btn_pause)
 
     def run(self):
         self.load_config()
@@ -464,8 +498,14 @@ class Controller:
         if self.mode == 'action':
             return
         Devices.probe()
-        self.btn_buzzer.set_active(Devices.buzzer_plugged_in())
-        self.btn_lightbar.set_active(Devices.lightbar_plugged_in())
+        if Devices.buzzer_plugged_in():
+            self.activate(self.btn_buzzer)
+        else:
+            self.deactivate(self.btn_buzzer)
+        if Devices.lightbar_plugged_in():
+            self.activate(self.btn_lightbar)
+        else:
+            self.deactivate(self.btn_lightbar)
 
     def reset_action(self):
         self.led_pos = 1
