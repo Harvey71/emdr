@@ -5,8 +5,8 @@ from config import Config
 from time import sleep
 import os
 from threading import Timer
-from thorpy._utils.images import load_image
 from thorpy.painting.painters.imageframe import ButtonImage
+import sys
 
 PROBE_EVENT = pygame.USEREVENT + 1
 ACTION_EVENT = pygame.USEREVENT + 2
@@ -195,9 +195,11 @@ class Controller:
             elem.change_painter(elem.inactive_painter, autopress=False)
             elem.unblit_and_reblit()
 
-    def __init__(self):
+    def __init__(self, fullscreen=False, touchscreen=False):
         self.in_load = False
-        self.app = MyThorpyApp(size=(480, 320), caption="EMDR Controller", icon='pygame')
+        if touchscreen:
+            pygame.mouse.set_cursor((8,8),(0,0),(0,0,0,0,0,0,0,0),(0,0,0,0,0,0,0,0))
+        self.app = MyThorpyApp(size=(480, 320), caption="EMDR Controller", icon='pygame', flags=pygame.FULLSCREEN if fullscreen else 0)
         self.btn_start = self.button(0, 0, 'Play', self.start_click)
         self.btn_start24 = self.button(1, 0, 'Play24', self.start24_click)
         self.btn_stop = self.button(2, 0, 'Stop', self.stop_click)
@@ -208,8 +210,8 @@ class Controller:
         # speed area
         self.sel_counter = Selector(2, 1, 'Zähler', None, '{0:d}', None, None)
         self.sel_counter.set_value(0)
-        self.btn_speed_plus = self.button(1, 2, '+')
-        self.btn_speed_minus = self.button(3, 2, '-')
+        self.btn_speed_plus = self.button(3, 2, '+')
+        self.btn_speed_minus = self.button(1, 2, '-')
         self.sel_speed = Selector(2, 2, 'Geschwindigk.', Config.speeds, '{0:d}/min', self.btn_speed_plus, self.btn_speed_minus, self.update_speed)
         self.box_speed = Container(elements=[
             self.sel_counter,
@@ -222,11 +224,11 @@ class Controller:
         self.btn_light_off = self.button(2, 1, 'Off', togglable=True)
         self.switch_light = Switch(self.btn_light_on, self.btn_light_off, self.update_light)
         self.btn_light_test = self.button(3, 1, 'Test', self.light_test_click, togglable=True)
-        self.btn_light_color_plus = self.button(1, 2, '+')
-        self.btn_light_color_minus = self.button(3, 2, '-')
+        self.btn_light_color_plus = self.button(3, 2, '+')
+        self.btn_light_color_minus = self.button(1, 2, '-')
         self.sel_light_color = Selector(2, 2, 'Farbe', Config.colors, '{0}', self.btn_light_color_plus, self.btn_light_color_minus, self.update_light, cyclic=True)
-        self.btn_light_intens_plus = self.button(1, 3, '+')
-        self.btn_light_intens_minus = self.button(3, 3, '-')
+        self.btn_light_intens_plus = self.button(3, 3, '+')
+        self.btn_light_intens_minus = self.button(1, 3, '-')
         self.sel_light_intens = Selector(2, 3, 'Helligkeit', Config.intensities, '{0:d}%', self.btn_light_intens_plus, self.btn_light_intens_minus, self.update_light)
         self.box_lightbar = Container(elements=[
             self.btn_light_on,
@@ -244,8 +246,8 @@ class Controller:
         self.btn_buzzer_off = self.button(2, 1, 'Off', togglable=True)
         self.switch_buzzer = Switch(self.btn_buzzer_on, self.btn_buzzer_off, self.update_buzzer)
         self.btn_buzzer_test = self.button(3, 1, 'Test', self.buzzer_test_click)
-        self.btn_buzzer_duration_plus = self.button(1, 2, '+')
-        self.btn_buzzer_duration_minus = self.button(3, 2, '-')
+        self.btn_buzzer_duration_plus = self.button(3, 2, '+')
+        self.btn_buzzer_duration_minus = self.button(1, 2, '-')
         self.sel_buzzer_duration = Selector(2, 2, 'Dauer', Config.durations, '{0:d} ms', self.btn_buzzer_duration_plus, self.btn_buzzer_duration_minus, self.update_buzzer)
         self.box_buzzer = Container(elements=[
             self.btn_buzzer_on,
@@ -260,11 +262,11 @@ class Controller:
         self.btn_headphone_off = self.button(2, 1, 'Off', togglable=True)
         self.switch_headphone = Switch(self.btn_headphone_on, self.btn_headphone_off, self.update_sound)
         self.btn_headphone_test = self.button(3, 1, 'Test', self.headphone_test_click)
-        self.btn_headphone_volume_plus = self.button(1, 2, '+')
-        self.btn_headphone_volume_minus = self.button(3, 2, '-')
+        self.btn_headphone_volume_plus = self.button(3, 2, '+')
+        self.btn_headphone_volume_minus = self.button(1, 2, '-')
         self.sel_headphone_volume = Selector(2, 2, 'Lautstärke', Config.volumes, '{0:d}%', self.btn_headphone_volume_plus, self.btn_headphone_volume_minus, self.update_sound)
-        self.btn_headphone_tone_plus = self.button(1, 3, '+')
-        self.btn_headphone_tone_minus = self.button(3, 3, '-')
+        self.btn_headphone_tone_plus = self.button(3, 3, '+')
+        self.btn_headphone_tone_minus = self.button(1, 3, '-')
         self.sel_headphone_tone = Selector(2, 3, 'Ton', Config.tones, '{0}', self.btn_headphone_tone_plus, self.btn_headphone_tone_minus, self.update_sound, cyclic=True)
         self.box_headphone = Container(elements=[
             self.btn_headphone_on,
@@ -422,7 +424,7 @@ class Controller:
     def config_mode(self):
         self.mode = 'config'
         # no need to disable action timer, since it is a one-shot-timer
-        # enable periodic probing
+        # enable periodic prob<ing
         pygame.time.set_timer(PROBE_EVENT, 1000)
         # enable/disable buttons
         if not self.btn_pause.toggled:
@@ -493,8 +495,10 @@ class Controller:
 
     def pause_click(self):
         if self.btn_pause.toggled:
-            self.config_mode()
+            # do not do anything, since we have to wait till full inteval in completed
+            pass
         else:
+            # resume
             self.action_mode()
 
     def check_usb(self, event):
@@ -534,6 +538,8 @@ class Controller:
                 self.direction = 1
             if cntr == self.max_counter:
                 self.stop_click()
+            if self.btn_pause.toggled:
+                self.config_mode()
         if self.led_pos == Devices.led_num:
             if self.switch_buzzer.get_value():
                 Devices.do_buzzer(False)
@@ -544,9 +550,11 @@ class Controller:
         self.led_pos += self.direction
 
 
-def main():
-    controller = Controller()
+def main(argv):
+    fullscreen = 'fullscreen' in argv
+    touchscreen = 'touchscreen' in argv
+    controller = Controller(fullscreen, touchscreen)
     controller.run()
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])
