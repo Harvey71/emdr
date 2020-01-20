@@ -107,9 +107,9 @@ see https://github.com/pyusb/pyusb for further instructions.
 #### On Raspberry Pi
 
 To set up a standalone controller on a Raspberry Pi, you would have to do some expert work, like installing a
-Linux OS on a SD card, install an start the LCD driver for the touchscreen display, change password, configure
-for graphical desktop with auto login, download and install the controller software from my repository and set up
-the desktop to autostart the controller software after boot.
+Linux OS on a SD card, install an start the LCD driver for the touchscreen display, istall libusb,
+change password, configure for graphical desktop with auto login, download and install the controller software
+from my repository and set up the desktop to autostart the controller software after boot.
 
 But fotunately, there is [PiBakery](https://www.pibakery.org/). You can use the "recipe"-File from my repository
 (subdirectory "pi") and PiBakery to burn a ready-to-go SD-card. At the very first boot, the Raspberry Pi will download
