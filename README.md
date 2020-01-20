@@ -8,6 +8,8 @@ Please refer to his video for mounting.
 
 ### Light bar
 
+![light bar](artwork/lightbar.jpg)
+
 The invention of LED stripes with ready mounted LED pixels makes the DIY manufacturing of EMDR light bar a piece of cake. :-)
 
 The only electrical component missing from these stripes is an USB connection. This is done by a Teensy microcontroller,
@@ -34,6 +36,9 @@ amount|article|example order link
 1|micro USB cable 1.8m|https://www.amazon.de/dp/B01GGKYE4U
 
 ### Buzzers
+
+![buzzers](artwork/buzzers.jpg)
+
 
 #### Parts list
 
@@ -65,6 +70,8 @@ amount|article|example order link
 
 
 ### Controller
+
+![controller](artwork/controller.jpg)
 
 Controller is optional. You can also use a PC or Laptop with MacOS, Windows oder Linux to run the controller software.
 
