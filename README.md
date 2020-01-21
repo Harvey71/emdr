@@ -4,7 +4,7 @@ Do It Yourself EMDR equipment (lightbar, buzzers and headphones). Firmware and c
 
 ## Hardware
 
-Please refer to his video for mounting.
+Please watch this [video](https://youtu.be/0NRr-7e_mLk) about the project.
 
 ### Light bar
 
