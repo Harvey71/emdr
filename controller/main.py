@@ -2,9 +2,9 @@ import thorpy
 import pygame
 from devices import Devices
 from config import Config
+from hiperf_timer import HighPerfTimer
 from time import sleep
 import os
-from threading import Timer
 from thorpy.painting.painters.imageframe import ButtonImage
 import sys
 
@@ -435,13 +435,14 @@ class Controller:
 
     def post_action(self):
         if self.mode == 'action':
+            timer = HighPerfTimer(self.action_delay, self.post_action)
             event = pygame.event.Event(ACTION_EVENT)
             try:
                 pygame.event.post(event)
             except:
                 # cath pygame error in case of overfull event pipe
                 pass
-            Timer(self.action_delay, self.post_action).start()
+            timer.start()
 
     def adjust_action_timer(self):
         # use python threading timer instead of pygame timer due to bad resolution of pygame timer
@@ -459,7 +460,7 @@ class Controller:
         self.update_sound()
         # enable action timer
         self.adjust_action_timer()
-        Timer(self.action_delay, self.post_action).start()
+        HighPerfTimer(self.action_delay, self.post_action).start()
         # enable/disable buttons
         self.deactivate(self.btn_start)
         self.deactivate(self.btn_start24)
