@@ -14,7 +14,7 @@ The invention of LED stripes with ready mounted LED pixels makes the DIY manufac
 
 The only electrical component missing from these stripes is an USB connection. This is done by a Teensy microcontroller,
 which implements a USB peripheral protocol on the one hand and the WS2812 serial bus on the other. The USB connection
-also powers the microcontroller and the LEDs. Fortunately, an EMDR light bar has never more than one LED illuminated
+also powers the microcontroller and the LEDs. Fortunately, an EMDR light bar never has more than one LED illuminated
 at the same time, so USB current is sufficient.
 
 Wiring is quite simple, since the Teensy LC already has a 5 V driver on board. 
@@ -73,7 +73,7 @@ amount|article|example order link
 
 ![controller](artwork/controller.jpg)
 
-Controller is optional. You can also use a PC or Laptop with MacOS, Windows oder Linux to run the controller software.
+Controller is optional. You can also use a PC or Laptop with MacOS, Windows or Linux to run the controller software.
 
 amount|article|example order link
 ---|----|----
@@ -92,11 +92,11 @@ Just attach an appropriate headphone to the sound jack.
 ### Lightbar and buzzers
 
 Easiest way to program the Teensy microcontrollers is to use the [Arduino IDE](https://www.arduino.cc/en/Main/Software) with
-[Teensyduino](https://www.pjrc.com/teensy/td_download.html) extention. You can run this on MacOS, Windows or Linux.
+[Teensyduino](https://www.pjrc.com/teensy/td_download.html) extension. You can run this on MacOS, Windows or Linux.
 Just start the IDE, load the proper Arduino project file from my repository (subdirectory "firmware"), 
 attach the teensy device, press the programming button on the device and the upload button in the IDE. Done.
 
-You can test the device by using the Arduino serial monitor tool. Just send the letter "i". You sould receive the
+You can test the device by using the Arduino serial monitor tool. Just send the letter "i". You should receive the
 device identifier, either "EMDR Lightbar" or "EMDR Buzzer".
 
 ### Controller
@@ -114,11 +114,11 @@ see https://github.com/pyusb/pyusb for further instructions.
 #### On Raspberry Pi
 
 To set up a standalone controller on a Raspberry Pi, you would have to do some expert work, like installing a
-Linux OS on a SD card, install an start the LCD driver for the touchscreen display, istall libusb,
+Linux OS on a SD card, install and start the LCD driver for the touchscreen display, istall libusb,
 change password, configure for graphical desktop with auto login, download and install the controller software
 from my repository and set up the desktop to autostart the controller software after boot.
 
-But fotunately, there is [PiBakery](https://www.pibakery.org/). You can use the "recipe"-File from my repository
+But fortunately, there is [PiBakery](https://www.pibakery.org/). You can use the "recipe"-File from my repository
 (subdirectory "pi") and PiBakery to burn a ready-to-go SD-card. At the very first boot, the Raspberry Pi will download
 and install all necessary software. For that, the Pi will have to have internet access. Just attach the Pi to your
 local ethernet. After a while, the Pi reboots and shows the controller software. From now on, no network connection
