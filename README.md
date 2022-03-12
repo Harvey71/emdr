@@ -20,6 +20,16 @@ at the same time, so USB current is sufficient.
 Wiring is quite simple, since the Teensy LC already has a 5 V driver on board. 
 Please refer to https://github.com/PaulStoffregen/WS2812Serial.
 
+Teensy LC's 5V driver is hard wired to pin 17. Unfortunately, the WS2812Serial library does not support pin 17 as output.
+But it supports pin 24. So connect pin 24 to pin 17 and thus to the input of the 5V driver.
+Then connect the output of the driver, mostly named "17 at Vin voltage" (the pin between "3.3V" and "12"),
+to DIn of the light strip.
+
+You also have to connect 5V of the Teensy to 5V of the LED strip, same with GND. Since 5V and GND are looped through the
+whole LED strip, it does not matter where to connect them. So you can use the solder pads that are closest to the Teensy.
+However, that is different with the data line. You have to use the solder pin labelled "DI" or "DIn" at the end of the
+LED strip.
+
 #### Parts list
 
 amount|article|example order link
