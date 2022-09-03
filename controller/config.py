@@ -22,8 +22,8 @@ class Config():
         20, 40, 60, 80, 100
     ]
     tones = [
-        ('medium/short', 440, 50),
-        ('medium/long', 440, 100),
+        ('med./short', 440, 50),
+        ('med./long', 440, 100),
         ('high/short', 880, 100),
         ('high/long', 880, 200),
         ('low/short', 220, 25),

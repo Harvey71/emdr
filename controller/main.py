@@ -197,6 +197,8 @@ class Controller:
 
     def __init__(self, fullscreen=False, touchscreen=False):
         self.in_load = False
+        self.pausing = False
+        self.stopping = False
         if touchscreen:
             pygame.mouse.set_cursor((8,8),(0,0),(0,0,0,0,0,0,0,0),(0,0,0,0,0,0,0,0))
         self.app = MyThorpyApp(size=(480, 320), caption="EMDR Controller", icon='pygame', flags=pygame.FULLSCREEN if fullscreen else 0)
@@ -205,14 +207,16 @@ class Controller:
         self.btn_stop = self.button(2, 0, 'Stop', self.stop_click)
         self.btn_pause = self.button(3, 0, 'Pause', self.pause_click, togglable=True)
         self.btn_lightbar = self.button(0, 1, 'Light', self.lightbar_click, togglable=True)
+        self.btn_lightbar.active = False
         self.btn_buzzer = self.button(0, 2, 'Buzzer', self.buzzer_click, togglable=True)
+        self.btn_buzzer.active = False
         self.btn_headphone = self.button(0, 3, 'Sound', self.headphone_click, togglable=True)
         # speed area
-        self.sel_counter = Selector(2, 1, 'Zähler', None, '{0:d}', None, None)
+        self.sel_counter = Selector(2, 1, 'Counter', None, '{0:d}', None, None)
         self.sel_counter.set_value(0)
         self.btn_speed_plus = self.button(3, 2, '+')
         self.btn_speed_minus = self.button(1, 2, '-')
-        self.sel_speed = Selector(2, 2, 'Geschwindigk.', Config.speeds, '{0:d}/min', self.btn_speed_plus, self.btn_speed_minus, self.update_speed)
+        self.sel_speed = Selector(2, 2, 'Speed.', Config.speeds, '{0:d}/min', self.btn_speed_plus, self.btn_speed_minus, self.update_speed)
         self.box_speed = Container(elements=[
             self.sel_counter,
             self.btn_speed_plus,
@@ -226,10 +230,10 @@ class Controller:
         self.btn_light_test = self.button(3, 1, 'Test', self.light_test_click, togglable=True)
         self.btn_light_color_plus = self.button(3, 2, '+')
         self.btn_light_color_minus = self.button(1, 2, '-')
-        self.sel_light_color = Selector(2, 2, 'Farbe', Config.colors, '{0}', self.btn_light_color_plus, self.btn_light_color_minus, self.update_light, cyclic=True)
+        self.sel_light_color = Selector(2, 2, 'Colour', Config.colors, '{0}', self.btn_light_color_plus, self.btn_light_color_minus, self.update_light, cyclic=True)
         self.btn_light_intens_plus = self.button(3, 3, '+')
         self.btn_light_intens_minus = self.button(1, 3, '-')
-        self.sel_light_intens = Selector(2, 3, 'Helligkeit', Config.intensities, '{0:d}%', self.btn_light_intens_plus, self.btn_light_intens_minus, self.update_light)
+        self.sel_light_intens = Selector(2, 3, 'Brightness', Config.intensities, '{0:d}%', self.btn_light_intens_plus, self.btn_light_intens_minus, self.update_light)
         self.box_lightbar = Container(elements=[
             self.btn_light_on,
             self.btn_light_off,
@@ -248,7 +252,7 @@ class Controller:
         self.btn_buzzer_test = self.button(3, 1, 'Test', self.buzzer_test_click)
         self.btn_buzzer_duration_plus = self.button(3, 2, '+')
         self.btn_buzzer_duration_minus = self.button(1, 2, '-')
-        self.sel_buzzer_duration = Selector(2, 2, 'Dauer', Config.durations, '{0:d} ms', self.btn_buzzer_duration_plus, self.btn_buzzer_duration_minus, self.update_buzzer)
+        self.sel_buzzer_duration = Selector(2, 2, 'Duration', Config.durations, '{0:d} ms', self.btn_buzzer_duration_plus, self.btn_buzzer_duration_minus, self.update_buzzer)
         self.box_buzzer = Container(elements=[
             self.btn_buzzer_on,
             self.btn_buzzer_off,
@@ -264,10 +268,10 @@ class Controller:
         self.btn_headphone_test = self.button(3, 1, 'Test', self.headphone_test_click)
         self.btn_headphone_volume_plus = self.button(3, 2, '+')
         self.btn_headphone_volume_minus = self.button(1, 2, '-')
-        self.sel_headphone_volume = Selector(2, 2, 'Lautstärke', Config.volumes, '{0:d}%', self.btn_headphone_volume_plus, self.btn_headphone_volume_minus, self.update_sound)
+        self.sel_headphone_volume = Selector(2, 2, 'Volume', Config.volumes, '{0:d}%', self.btn_headphone_volume_plus, self.btn_headphone_volume_minus, self.update_sound)
         self.btn_headphone_tone_plus = self.button(3, 3, '+')
         self.btn_headphone_tone_minus = self.button(1, 3, '-')
-        self.sel_headphone_tone = Selector(2, 3, 'Ton', Config.tones, '{0}', self.btn_headphone_tone_plus, self.btn_headphone_tone_minus, self.update_sound, cyclic=True)
+        self.sel_headphone_tone = Selector(2, 3, 'Sound', Config.tones, '{0}', self.btn_headphone_tone_plus, self.btn_headphone_tone_minus, self.update_sound, cyclic=True)
         self.box_headphone = Container(elements=[
             self.btn_headphone_on,
             self.btn_headphone_off,
@@ -297,8 +301,12 @@ class Controller:
         self.back.add_reaction(thorpy.Reaction(reacts_to=ACTION_EVENT, reac_func=self.action))
         self.menu = thorpy.Menu(self.back)
         self.config_mode()
-        self.check_usb(None)
         self.reset_action()
+        self.activate(self.btn_lightbar)
+        self.deactivate(self.btn_lightbar)
+        self.activate(self.btn_buzzer)
+        self.deactivate(self.btn_buzzer)
+        self.check_usb(None)
 
     def lightbar_click(self):
         if self.btn_lightbar.toggled:
@@ -326,10 +334,6 @@ class Controller:
 
     def light_test_click(self):
         self.update_light()
-        if self.btn_light_test.toggled:
-            Devices.set_led(-1)
-        else:
-            Devices.set_led(0)
 
     def buzzer_test_click(self):
         self.update_buzzer()
@@ -353,8 +357,8 @@ class Controller:
         Devices.set_color(color)
         if self.btn_light_test.toggled:
             Devices.set_led(-1)
-        if self.mode == 'action' and not self.switch_light.get_value():
-            Devices.set_led(0)
+        else:
+            Devices.set_led(Devices.led_num / 2 + 1 if self.switch_light.get_value() else 0)
         self.save_config()
 
     def update_buzzer(self):
@@ -435,12 +439,12 @@ class Controller:
 
     def post_action(self):
         if self.mode == 'action':
-            timer = HighPerfTimer(self.action_delay, self.post_action)
+            timer = HighPerfTimer(self.action_delay + self.action_extra_delay, self.post_action)
             event = pygame.event.Event(ACTION_EVENT)
             try:
                 pygame.event.post(event)
             except:
-                # cath pygame error in case of overfull event pipe
+                # catch pygame error in case of overfull event pipe
                 pass
             timer.start()
 
@@ -448,13 +452,19 @@ class Controller:
         # use python threading timer instead of pygame timer due to bad resolution of pygame timer
         # (typical 10ms)
         self.action_delay = (60 / self.sel_speed.get_value() / Devices.led_num / 2)
+        self.action_extra_delay = 0
 
     def action_mode(self):
+        if self.mode == 'action':
+            return
         self.mode = 'action'
+        if not self.pausing:
+            self.sel_counter.set_value(0)
+        self.stopping = False
+        self.pausing = False
         # disable periodic probing
         pygame.time.set_timer(PROBE_EVENT, 0)
         # prepare devices
-        Devices.set_led(0)
         self.update_light()
         self.update_buzzer()
         self.update_sound()
@@ -472,7 +482,7 @@ class Controller:
         self.set_area('speed')
         self.menu.play()
         self.save_config()
-        Devices.set_led(0)
+        #Devices.set_led(0)
         self.app.quit()
 
     def start_click(self):
@@ -491,16 +501,24 @@ class Controller:
         if self.btn_pause.toggled:
             self.btn_pause._force_unpress()
             self.btn_pause.unblit_and_reblit()
-        self.config_mode()
-        self.reset_action()
+        if self.mode == 'action':
+            self.stopping = True
+        else:
+            self.config_mode()
+            self.reset_action()
 
     def pause_click(self):
         if self.btn_pause.toggled:
-            # do not do anything, since we have to wait till full inteval in completed
-            pass
+            # pause
+            self.pausing = True
         else:
             # resume
-            self.action_mode()
+            if self.mode != 'action':
+                self.action_mode()
+            else:
+                self.pausing = False
+                self.action_extra_delay = 0
+                self.decay = False
 
     def check_usb(self, event):
         if self.mode == 'action':
@@ -511,44 +529,55 @@ class Controller:
         else:
             self.deactivate(self.btn_buzzer)
         if Devices.lightbar_plugged_in():
+            if not self.btn_lightbar.active:
+                Devices.set_led(Devices.led_num / 2 + 1)
             self.activate(self.btn_lightbar)
         else:
             self.deactivate(self.btn_lightbar)
 
     def reset_action(self):
-        self.led_pos = 1
-        self.direction = 1
-        self.sel_counter.set_value(0)
-        Devices.set_led(0)
-        self.btn_pause._force_unpress()
-        self.btn_pause.unblit_and_reblit()
+        print('reset_action')
+        self.led_pos = int(Devices.led_num / 2) + 1 # start in the middle
+        self.direction = -1
+        self.decay = False
+        Devices.set_led(self.led_pos if self.switch_light.get_value() else 0)
 
     def action(self, event):
         if self.mode != 'action':
             return
         if self.switch_light.get_value():
             Devices.set_led(self.led_pos)
+        cntr = self.sel_counter.get_value()
         if self.led_pos == 1:
-            cntr = self.sel_counter.get_value() + 1
-            self.sel_counter.set_value(cntr)
+            # left end
             if self.switch_buzzer.get_value():
                 Devices.do_buzzer(True)
             if self.switch_headphone.get_value():
                 Devices.do_sound(True)
             if self.direction == -1:
                 self.direction = 1
-            if cntr == self.max_counter:
-                self.stop_click()
-            if self.btn_pause.toggled:
-                self.config_mode()
         if self.led_pos == Devices.led_num:
+            # right end
             if self.switch_buzzer.get_value():
                 Devices.do_buzzer(False)
             if self.switch_headphone.get_value():
                 Devices.do_sound(False)
             if self.direction == 1:
                 self.direction = -1
+            if cntr == self.max_counter or self.stopping or self.pausing:
+                self.decay = True
+        if self.led_pos == int(Devices.led_num / 2) + 1 and self.direction == -1:
+            # in the middle
+            if self.decay:
+                self.config_mode()
+                self.reset_action()
+                return
+            else:
+                cntr += 1
+            self.sel_counter.set_value(cntr)
         self.led_pos += self.direction
+        if self.decay:
+            self.action_extra_delay = (self.action_extra_delay or self.action_delay / Devices.led_num) * 1.3
 
 
 def main(argv):
