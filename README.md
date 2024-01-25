@@ -45,6 +45,111 @@ amount|article|example order link
 6|countersunk screw 3.0x12 mm|hardware store
 1|micro USB cable 1.8m|https://www.amazon.de/dp/B01GGKYE4U
 
+#### Teensy LC replacement
+
+When I came up with the original design in 2019, the Teensy LC microcontroller board was the best choice: cheap,
+small, powerful, with USB and a 5V digital output port (driven by an onboard level shifter). Unfortunately, the Teensy LC
+became poorly available and/or expensive over the years. If you have the chance to buy this board for less than 20€, then
+it is still the first choice in my opinion.
+
+It is not too easy to find a replacement with 5V output(s). There are some, but with other disadvantages. I wanted to provide
+sustainable, cheap and easy solutions and went for the most common microcontroller boards (as of 2024). They all need
+additional level shifters which are also cheap and available. Many other boards will work, but here are three alternatives,
+all tested and supported by the recent software version:
+
+_**D1 Mini**_
+
+amount| article         |example order link
+---|-----------------|----
+1| D1 ESP8266 mini |https://www.amazon.de/gp/product/B0CB85Q78G
+1| level shifter   |https://www.amazon.de/gp/product/B082F6BSB5
+
+Wiring:
+
+![light bar](artwork/wiring_d1mini.png)
+
+Please note that you can connect the 5V and ground cables to any corresponding position on the stripe, while the data
+cable has to be connected to the leftmost "Din" pad.
+
+For this microcontroller I provide Python code. For burning, I recommend [Thonny IDE](https://thonny.org/).
+After connecting the board with your PC via an USB cable, you can follow these steps in Thonny:
+- Open menu Run/Configure Interpreter...
+- Choose "Micropython (ESP8266)" for interpreter and select the correct USB port
+- Press "Install or update MicroPython (esptool)"
+- Select "ESP8266" for MicroPython family, "Espressif - ESP82665" for variant and "1.22.1" for version
+- You may have to click on the ☰-Button and select "Show install options"
+- Select "dio" for Flash mode and "4MB" for Flash size, leave all other options at their default
+- Press "Install" and wait until flashing is finished, then press "Close", then press "OK"
+- On the left "Files" panel click on "This computer" and navigate to the [firmware/lightbar](firmware/lightbar)
+  directory of this project.
+- Now you should see "main.py" and "neopixel.py" in the "This computer" and "boot.py" in the "MicroPython device" 
+  section of the file panel.
+- Select "main.py" and "neopixel.py" (using the shift key), press right mouse button and select "Upload to /".
+- After a short time you should see the files in the "MicroPython device" section, and you are done. Disconnect
+  the board.
+
+_**Raspberry Pi Pico**_
+
+amount| article           |example order link
+---|-------------------|----
+1| Raspberry Pi Pico |https://www.amazon.de/gp/product/B09KVB8LVR
+1| level shifter     |https://www.amazon.de/gp/product/B082F6BSB5
+
+Wiring:
+
+![light bar](artwork/wiring_pico.png)
+
+Please note that you can connect the 5V and ground cables to any corresponding position on the stripe, while the data
+cable has to be connected to the leftmost "Din" pad.
+
+For this microcontroller I provide Python code. For burning, I recommend [Thonny IDE](https://thonny.org/).
+Please **hold down the "Bootsel" button** on the board while connecting it with your PC via an USB cable. 
+Then you can follow these steps in Thonny:
+- Open menu Run/Configure Interpreter...
+- Choose "Micropython (RP2040)" for interpreter
+- Press "Install or update MicroPython"
+- Select the proper Targe volume, choose "RP2" for MicoPython family, "Raspberry Pi · Pico" for variant and
+  "1.22.1" for version
+- Press "Install" and wait until flashing is finished, then press "Close", then press "OK"
+- On the left "Files" panel click on "This computer" and navigate to the [firmware/lightbar](firmware/lightbar)
+  directory of this project.
+- Now you should see "main.py" and "neopixel.py" in the "This computer" section and the "MicroPython device" section
+  should be blank.
+- Select "main.py" and "neopixel.py" (using the shift key), press right mouse button and select "Upload to /".
+- After a short time you should see the files in the "MicroPython device" section, and you are done. Disconnect
+  the board.
+
+
+
+_**Teensy 4.0**_
+
+This is a rather expensive board (around 30€) and the processor is quite oversized, so I would only recommend it
+if you already have one.
+
+amount| article       |example order link
+---|---------------|----
+1| Teensy 4.0    |https://www.amazon.de/gp/product/B07W5J3WNH
+1| level shifter |https://www.amazon.de/gp/product/B082F6BSB5
+
+Wiring:
+
+![light bar](artwork/wiring_teensy40.png)
+
+Please note that you can connect the 5V and ground cables to any corresponding position on the stripe, while the data
+cable has to be connected to the leftmost "Din" pad.
+
+The processor is powerful enough to run Micropython. Unfortunately I got regular glitches on the LED stripe using the 
+Micropython code. I guess there are timing issues. So if you want to use the Teensy 4.0, please use the [C Code](firmware/lightbar/lightbar.ino)
+and Teensyduino for flashing the firmware - just like with the Teensy LC. If you choose the right board in the IDE, the
+code will adapt and use the correct port corresponding to the pin shown in the wiring diagram above.
+
+_**Some notes:**_
+- The controller software now supports any of the four recommended microcontrollers and detect them automatically
+- If you want to use the buzzers, you also have to replace the microcontroller there. But I haven't done the work to adapt
+  the firmware and provide wiring schematics yet. In my experience, most users just go with the light bar. Please let me
+  know if you need the buzzers and I will provide it. (Maybe it will take some time, as this is still just my hobby.)
+
+
 ### Buzzers
 
 ![buzzers](artwork/buzzers.jpg)

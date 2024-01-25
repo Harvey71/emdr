@@ -2,6 +2,13 @@
 
 #define BUFLEN 200
 #define NUMLED 57
+#if defined(__arm__) 
+  #define PIN 1
+  #define BAUD_RATE 115200
+#else
+  #define PIN 24
+  #define BAUD_RATE 9600
+#endif
 #define ID "EMDR Lightbar"
 
 
@@ -9,10 +16,10 @@
 
 byte drawingMemory[NUMLED * 3];
 DMAMEM byte displayMemory[NUMLED * 12];
-WS2812Serial leds(60, displayMemory, drawingMemory, 24, WS2812_GRB);
+WS2812Serial leds(60, displayMemory, drawingMemory, PIN, WS2812_GRB);
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(BAUD_RATE);
   leds.begin();
   test();
 }

@@ -1,8 +1,8 @@
-import usb
+from serial import Serial
+from serial.tools.list_ports import comports
 import pygame
 from array import array
-import platform
-
+from device_config import DEVICE_CONFIG
 
 class Note(pygame.mixer.Sound):
     def __init__(self, frequency, volume=.33):
@@ -32,59 +32,69 @@ class Devices():
     _channel_right.set_volume(0, 1)
     _beep = Note(440)
     _sound_duration = 50
-    _lightbar = None
-    _buzzer = None
+    _lightbar = (None, None)
+    _buzzer = (None, None)
 
     @classmethod
     def probe(cls):
-        if cls._lightbar:
-            cls._lightbar.finalize()
-            cls._lightbar = None
-        if cls._buzzer:
-            cls._buzzer.finalize()
-            cls._buzzer = None
-        devs = usb.core.find(find_all=True, idVendor=0x16c0)
-        for dev in devs:
-            try:
-                # print(repr(dev))
-                try:
-                    dev.write(0x03, 'i\n')
-                except usb.core.USBError:
-                    dev.detach_kernel_driver(0)
-                    dev.write(0x03, 'i\n')
-                id_arr = dev.read(0x84, size_or_buffer=64, timeout=100)
-                id_str = ''.join(chr(x) for x in id_arr).strip()
-                #print(id_str)
-                if id_str.find('EMDR Lightbar') == 0:
-                    cls._lightbar = dev
-                if id_str.find('EMDR Buzzer') == 0:
-                    cls._buzzer = dev
-            except:
-                dev.finalize()
-                pass
+        _, ser = cls._lightbar
+        if ser:
+            ser.close()
+        cls._lightbar = (None, None)
+        _, ser = cls._buzzer
+        if ser:
+            ser.close()
+        cls._buzzer = (None, None)
+        for p in comports():
+            for d in DEVICE_CONFIG.values():
+                if (p.vid, p.pid) == (d['vid'], d['pid']):
+                    ser = None
+                    try:
+                        ser = Serial(p.device, baudrate=d['baud'], timeout=0.1)
+                        ser.write(b'i\r\n')
+                        ser.flush()
+                        if d['echo']:
+                            ser.read_until()
+                        id_str = ser.read_until().strip()
+                        if id_str.find(b'EMDR Lightbar') == 0:
+                            cls._lightbar = (d, ser)
+                        elif id_str.find(b'EMDR Buzzer') == 0:
+                            cls._buzzer = (d, ser)
+                        else:
+                            ser.close()
+                    except:
+                        if ser:
+                            ser.close()
+                        pass
 
     @classmethod
     def lightbar_plugged_in(cls):
-        return cls._lightbar is not None
+        return cls._lightbar != (None, None)
 
     @classmethod
     def buzzer_plugged_in(cls):
-        return cls._buzzer is not None
+        return cls._buzzer != (None, None)
+
+    @classmethod
+    def write(cls, devser, cmd):
+        (dev, ser) = devser
+        if dev and ser:
+            ser.write(cmd)
+            ser.flush()
+            if dev['echo']:
+                ser.read_until().strip()
+
 
     @classmethod
     def set_led(cls, num):
-        dev = cls._lightbar
-        if dev:
-            if num >= 0:
-                dev.write(3, 'l%d\n' % num)
-            else:
-                dev.write(3, 't\n')
+        if num >= 0:
+            cls.write(cls._lightbar, b'l %d\r\n' % num)
+        else:
+            cls.write(cls._lightbar, b't\r\n')
 
     @classmethod
     def set_color(cls, col):
-        dev = cls._lightbar
-        if dev:
-            dev.write(3, 'c%d\n' % col)
+        cls.write(cls._lightbar, b'c %d\r\n' % col)
 
     @classmethod
     def set_buzzer_duration(cls, duration):
@@ -92,9 +102,7 @@ class Devices():
 
     @classmethod
     def do_buzzer(cls, left):
-        dev = cls._buzzer
-        if dev:
-            dev.write(3, ('l' if left else 'r') + '%d\n' % cls._buzzer_duration)
+        cls.write(cls._buzzer, b'l' if left else b'r' + b' %d\r\n' % cls._buzzer_duration)
 
     @classmethod
     def do_sound(cls, left):

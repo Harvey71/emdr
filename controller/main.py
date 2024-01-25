@@ -1,5 +1,5 @@
-import thorpy
 import pygame
+import thorpy
 from devices import Devices
 from config import Config
 from hiperf_timer import HighPerfTimer
