@@ -102,7 +102,7 @@ class Devices():
 
     @classmethod
     def do_buzzer(cls, left):
-        cls.write(cls._buzzer, b'l' if left else b'r' + b' %d\r\n' % cls._buzzer_duration)
+        cls.write(cls._buzzer, (b'l' if left else b'r') + b' %d\r\n' % cls._buzzer_duration)
 
     @classmethod
     def do_sound(cls, left):
