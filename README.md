@@ -145,9 +145,7 @@ code will adapt and use the correct port corresponding to the pin shown in the w
 
 _**Some notes:**_
 - The controller software now supports any of the four recommended microcontrollers and detect them automatically
-- If you want to use the buzzers, you also have to replace the microcontroller there. But I haven't done the work to adapt
-  the firmware and provide wiring schematics yet. In my experience, most users just go with the light bar. Please let me
-  know if you need the buzzers and I will provide it. (Maybe it will take some time, as this is still just my hobby.)
+- If you want to use the buzzers, you also have to replace the microcontroller there. Please see below.
 
 
 ### Buzzers
@@ -176,13 +174,96 @@ amount|article|example order link
 1|micro USB cable 1.8m|https://www.amazon.de/dp/B01GGKYE4U
 1|single row pin header (male & female)|https://www.amazon.de/dp/B016U9XYBG
 
-
 #### Electronic schematic
 ![buzzer electronic schema](artwork/buzzer_sch.png)
 
 #### Electronic layout
 ![buzzer electronic schema](artwork/buzzer_pcb.png)
 
+#### Teensy LC replacement
+
+Though it is not a technical requirement, the software expects to find the same microcontroller type for the buzzer as
+for the lightbar. Please use the corresponding replacement listed below. I also made wiring a bit easier by using a
+new driver board.
+
+_**D1 Mini**_
+
+amount| article             |example order link
+------|---------------------|------------------
+1| D1 ESP8266 mini     |https://www.amazon.de/gp/product/B0CB85Q78G
+1| UL2803 driver board |https://www.amazon.de/gp/product/B08CHC43YC
+
+Wiring:
+
+![buzzer](artwork/wiring_d1mini_buzzer.png)
+
+For this microcontroller I provide Python code. For burning, I recommend [Thonny IDE](https://thonny.org/).
+After connecting the board with your PC via an USB cable, you can follow these steps in Thonny:
+- Open menu Run/Configure Interpreter...
+- Choose "Micropython (ESP8266)" for interpreter and select the correct USB port
+- Press "Install or update MicroPython (esptool)"
+- Select "ESP8266" for MicroPython family, "Espressif - ESP82665" for variant and "1.22.1" for version
+- You may have to click on the ☰-Button and select "Show install options"
+- Select "dio" for Flash mode and "4MB" for Flash size, leave all other options at their default
+- Press "Install" and wait until flashing is finished, then press "Close", then press "OK"
+- On the left "Files" panel click on "This computer" and navigate to the [firmware/buzzer](firmware/buzzer)
+  directory of this project.
+- Now you should see "main.py" in the "This computer" and "boot.py" in the "MicroPython device" 
+  section of the file panel.
+- Select "main.py", press right mouse button and select "Upload to /".
+- After a short time you should see the files in the "MicroPython device" section, and you are done. Disconnect
+  the board.
+
+_**Raspberry Pi Pico**_
+
+amount| article           |example order link
+---|-------------------|----
+1| Raspberry Pi Pico |https://www.amazon.de/gp/product/B09KVB8LVR
+1| level shifter     |https://www.amazon.de/gp/product/B082F6BSB5
+
+Wiring:
+
+![buzzer](artwork/wiring_pico_buzzer.png)
+
+For this microcontroller I provide Python code. For burning, I recommend [Thonny IDE](https://thonny.org/).
+Please **hold down the "Bootsel" button** on the board while connecting it with your PC via an USB cable. 
+Then you can follow these steps in Thonny:
+- Open menu Run/Configure Interpreter...
+- Choose "Micropython (RP2040)" for interpreter
+- Press "Install or update MicroPython"
+- Select the proper Targe volume, choose "RP2" for MicoPython family, "Raspberry Pi · Pico" for variant and
+  "1.22.1" for version
+- Press "Install" and wait until flashing is finished, then press "Close", then press "OK"
+- On the left "Files" panel click on "This computer" and navigate to the [firmware/buzzer](firmware/buzzer)
+  directory of this project.
+- Now you should see "main.py" in the "This computer" section and the "MicroPython device" section
+  should be blank.
+- Select "main.py", press right mouse button and select "Upload to /".
+- After a short time you should see the files in the "MicroPython device" section, and you are done. Disconnect
+  the board.
+
+
+
+_**Teensy 4.0**_
+
+This is a rather expensive board (around 30€) and the processor is quite oversized, so I would only recommend it
+if you already have one.
+
+amount| article       |example order link
+---|---------------|----
+1| Teensy 4.0    |https://www.amazon.de/gp/product/B07W5J3WNH
+1| level shifter |https://www.amazon.de/gp/product/B082F6BSB5
+
+Wiring:
+
+![buzzer](artwork/wiring_teensy40_buzzer.png)
+
+Actually, no change of the source code was necessary, because in this configuration the board in pin-compatible
+to the TeensyLC. So if you want to use the Teensy 4.0, please use the [C Code](firmware/buzzer/buzzer.ino)
+and Teensyduino for flashing the firmware - just like with the Teensy LC.
+
+_**Some notes:**_
+- The controller software now supports any of the four recommended microcontrollers and detect them automatically
 
 ### Controller
 
