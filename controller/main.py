@@ -577,7 +577,8 @@ class Controller:
             self.sel_counter.set_value(cntr)
         self.led_pos += self.direction
         if self.decay:
-            self.action_extra_delay = (self.action_extra_delay or self.action_delay / Devices.led_num) * 1.3
+            factor = (1.5 / self.action_delay) ** (2 / Devices.led_num)
+            self.action_extra_delay = (self.action_extra_delay or self.action_delay) * factor
 
 
 def main(argv):
