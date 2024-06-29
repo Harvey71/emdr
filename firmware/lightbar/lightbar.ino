@@ -1,16 +1,17 @@
-#include <WS2812Serial.h>
-
 #define BUFLEN 200
 #define NUMLED 57
-#if defined(__arm__) 
-  #define PIN 1
-  #define BAUD_RATE 115200
-#else
+
+#if defined(__MKL26Z64__)
+  // Teensy LC
   #define PIN 24
   #define BAUD_RATE 115200
+#else
+  // other Teensy, like Teensy 4.0
+  #define PIN 1
+  #define BAUD_RATE 115200
 #endif
-#define ID "EMDR Lightbar"
 
+#define ID "EMDR Lightbar"
 
 #include "WS2812Serial.h"
 
