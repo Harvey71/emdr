@@ -12,7 +12,11 @@ void setup() {
 
 void buzz(char pin, int duration_ms) {
   digitalWrite(pin, HIGH);
-  delayMicroseconds(duration_ms * 1000);
+  int waited = 0;
+  while (waited < duration_ms && !Serial.available()) {
+    delayMicroseconds(duration_ms * 10);
+    waited += 10;
+  }
   digitalWrite(pin, LOW);
 }
 
