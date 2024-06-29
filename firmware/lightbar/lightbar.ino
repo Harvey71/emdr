@@ -7,7 +7,7 @@
   #define BAUD_RATE 115200
 #else
   #define PIN 24
-  #define BAUD_RATE 9600
+  #define BAUD_RATE 115200
 #endif
 #define ID "EMDR Lightbar"
 

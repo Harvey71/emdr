@@ -4,7 +4,7 @@
 #define ID "EMDR Buzzer"
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   pinMode(L_PIN, OUTPUT);
   pinMode(R_PIN, OUTPUT);
   test();
