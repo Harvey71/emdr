@@ -7,6 +7,7 @@ from time import sleep
 import os
 from thorpy.painting.painters.imageframe import ButtonImage
 import sys
+from math import log
 
 PROBE_EVENT = pygame.USEREVENT + 1
 ACTION_EVENT = pygame.USEREVENT + 2
@@ -577,9 +578,12 @@ class Controller:
             self.sel_counter.set_value(cntr)
         self.led_pos += self.direction
         if self.decay:
-            factor = (1.5 / self.action_delay) ** (2 / Devices.led_num)
-            self.action_extra_delay = (self.action_extra_delay or self.action_delay) * factor
-
+            middle = int(Devices.led_num / 2) + 1
+            n = Devices.led_num - middle
+            pos = Devices.led_num - self.led_pos
+            alpha = log(1.2) / (log(n) - log(n - 1))
+            factor = 1.5 / n ** alpha
+            self.action_extra_delay = self.action_delay + factor * pos ** alpha
 
 def main(argv):
     fullscreen = 'fullscreen' in argv
