@@ -17,7 +17,7 @@
 
 byte drawingMemory[NUMLED * 3];
 DMAMEM byte displayMemory[NUMLED * 12];
-WS2812Serial leds(60, displayMemory, drawingMemory, PIN, WS2812_GRB);
+WS2812Serial leds(NUMLED, displayMemory, drawingMemory, PIN, WS2812_GRB);
 
 void setup() {
   Serial.begin(BAUD_RATE);
