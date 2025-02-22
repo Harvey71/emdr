@@ -14,6 +14,8 @@ elif machine.startswith('ESP module'):
     pin_no = 5
 elif machine.startswith('Raspberry Pi Pico'):
     pin_no = 16
+elif machine.startswith('Generic ESP32'):
+    pin_no = 4
 
 np = NeoPixel(Pin(pin_no), NUMLED, bpp=3)
 
