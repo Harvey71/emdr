@@ -430,7 +430,7 @@ class Controller:
         self.mode = 'config'
         # no need to disable action timer, since it is a one-shot-timer
         # enable periodic prob<ing
-        pygame.time.set_timer(PROBE_EVENT, 1000)
+        pygame.time.set_timer(PROBE_EVENT, 5000)
         # enable/disable buttons
         if not self.btn_pause.toggled:
             self.activate(self.btn_start)
